@@ -1,0 +1,29 @@
+# Secrets — never commit real credentials
+.env
+.env.*
+!.env.example
+credentials.json
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local runtime data (contains real customer contact details — never commit)
+n8n-data/
+data/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

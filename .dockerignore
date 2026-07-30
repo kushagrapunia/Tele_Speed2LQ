@@ -1,0 +1,30 @@
+# Secrets — never bake into the image
+.env
+.env.*
+!.env.example
+
+# Local envs & caches
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Runtime data (leads spreadsheet, customer contact info) — mount as a volume instead
+data/
+n8n-data/
+
+# VCS / editor
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Docs not needed inside the container — anchored to root so knowledge/README.md is NOT excluded
+/README.md
+/ARCHITECTURE.md
+/LINKEDIN_POST.md
+/Tele_Speed2LQ_Agent.md.txt
