@@ -1,11 +1,30 @@
 # GGBH Speed2Lead Bot
 
-A Telegram bot for **Gulf Gateway Business Hub (GGBH)** that answers customer questions about UAE
-business setup and immigration, and automatically qualifies leads into a spreadsheet — no CRM,
-no database, and only two API keys to configure.
+A Telegram bot for **Gulf Gateway Business Hub (GGBH)** that acts as a lightweight alternative to a
+typical **BPO-staffed chat process**: instead of a shift-based team of executives manually answering
+inbound business-setup and immigration questions and qualifying leads by hand, this bot does both —
+automatically, 24/7 — and logs every qualified lead straight to a spreadsheet, with no CRM, no
+database, and only two API keys to configure.
 
 > This is a working prototype. See [`ARCHITECTURE.md`](ARCHITECTURE.md) for how it's built and
 > [`knowledge/README.md`](knowledge/README.md) for what the bot knows (and its known data gaps).
+
+## Scope
+
+This is a **limited-scope prototype**, not a drop-in replacement for an entire BPO operation. It
+covers one narrow (but high-volume) slice of what a chat-process team typically handles — first-
+response FAQ answering and lead qualification — built around one company's (GGBH's) knowledge base,
+lead-qualification criteria, and Telegram as the single channel. It doesn't handle the fuller range
+of what a BPO team might: complex case escalation, document verification, multi-channel support, and
+so on.
+
+That narrowness is deliberate, not a limitation to apologize for — it's what makes the prototype
+fast to stand up and easy to reason about. The same pattern is straightforward to re-point at a
+different company's process: swap `knowledge/customer/*.md` for another company's rules, adjust the
+`record_qualified_lead` tool's required fields to match a different qualification checklist, and the
+core loop (answer from a knowledge base, recognize a qualified lead, log it) carries over unchanged.
+See [`VOICE_AGENT_PLAN.md`](VOICE_AGENT_PLAN.md) for how this same approach extends beyond chat to
+phone-based (voice) lead qualification.
 
 ## Features
 
@@ -75,6 +94,7 @@ file covers and two flagged data gaps that are intentionally left unresolved rat
 
 ## Project status
 
-Prototype stage — see `ARCHITECTURE.md` → "Known limitations" for what to revisit before any
-production use (single-process in-memory chat history, no file locking on the leads spreadsheet
-under concurrent load, etc.).
+Prototype stage, proving out a BPO-chat-process alternative for one specific use case — see
+`ARCHITECTURE.md` → "Known limitations" for what to revisit before any production use (single-process
+in-memory chat history, no file locking on the leads spreadsheet under concurrent load, etc.), and
+the "Scope" section above for what's intentionally out of scope rather than a bug.

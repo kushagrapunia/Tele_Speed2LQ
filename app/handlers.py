@@ -14,6 +14,17 @@ logger = logging.getLogger(__name__)
 
 conversation_store = {}
 _idle_close_tasks: dict[str, asyncio.Task] = {}
+_chat_locks: dict[str, asyncio.Lock] = {}
+
+
+def _get_chat_lock(chat_id: str) -> asyncio.Lock:
+    """One lock per chat: keeps a single chat's own messages processed in order,
+    while different chats still run fully concurrently on separate worker threads."""
+    lock = _chat_locks.get(chat_id)
+    if lock is None:
+        lock = asyncio.Lock()
+        _chat_locks[chat_id] = lock
+    return lock
 
 
 async def _send_formatted(bot, chat_id: int, text: str) -> None:
@@ -33,7 +44,7 @@ async def _close_idle_chat(chat_id: str, bot) -> None:
     if not history:
         return
 
-    summary = get_conversation_summary(history)
+    summary = await asyncio.to_thread(get_conversation_summary, history)
     await _send_formatted(
         bot,
         int(chat_id),
@@ -73,12 +84,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     user_text = update.message.text
     user = update.message.from_user
     telegram_username = (user.username or user.full_name or "") if user else ""
-    history = conversation_store.get(chat_id, [])
 
-    reply = get_llm_reply(user_text, history, chat_id=chat_id, telegram_username=telegram_username)
-    conversation_store[chat_id] = history + [{"role": "user", "content": user_text}, {"role": "assistant", "content": reply}]
+    async with _get_chat_lock(chat_id):
+        history = conversation_store.get(chat_id, [])
+        reply = await asyncio.to_thread(get_llm_reply, user_text, history, chat_id=chat_id, telegram_username=telegram_username)
+        conversation_store[chat_id] = history + [{"role": "user", "content": user_text}, {"role": "assistant", "content": reply}]
+
     await _send_formatted(context.bot, update.message.chat_id, reply)
-
     _reschedule_idle_close(chat_id, context.bot)
 
 
@@ -92,7 +104,10 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     if data in FAQS:
         await query.edit_message_text(FAQS[data])
     elif data == "book_call":
-        await query.edit_message_text("I can help you book a consultation. Please share your full name and preferred contact details.")
+        await query.edit_message_text(
+            "I can help you book a consultation 📅 Please share your name, the best way to reach you, "
+            "and a date and time you're available for a GGBH consultant to call you."
+        )
 
 
 def build_application() -> object:
@@ -101,7 +116,7 @@ def build_application() -> object:
 
     from telegram.ext import Application
 
-    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+    application = Application.builder().token(TELEGRAM_BOT_TOKEN).concurrent_updates(True).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_handler(CallbackQueryHandler(handle_callback))

@@ -8,9 +8,10 @@ RECORD_LEAD_TOOL = {
     "name": "record_qualified_lead",
     "description": (
         "Call this exactly once, when the visitor has given you (a) their name, (b) a way to reach "
-        "them (phone number, email, or Telegram handle), and (c) what they're interested in (e.g. "
-        "business setup, a specific visa type, or an immigration doubt). Do not call this more than "
-        "once in the same conversation."
+        "them (phone number, email, or Telegram handle), (c) what they're interested in (e.g. "
+        "business setup, a specific visa type, or an immigration doubt), and (d) a date and time "
+        "they're available for a GGBH consultant to call them for a consultation. Do not call this "
+        "more than once in the same conversation."
     ),
     "input_schema": {
         "type": "object",
@@ -21,9 +22,13 @@ RECORD_LEAD_TOOL = {
                 "type": "string",
                 "description": "Short label for what they want, e.g. 'Mainland company setup', 'Investor visa', 'Attested-degree doubt'",
             },
+            "preferred_callback_time": {
+                "type": "string",
+                "description": "The date and time the visitor is available for a consultant to call them, as they stated it, e.g. 'Tomorrow, 3-5pm' or 'Friday 2 Aug, morning'",
+            },
             "notes": {"type": "string", "description": "One or two sentence summary of their situation, drawn from the conversation"},
         },
-        "required": ["name", "contact", "interest"],
+        "required": ["name", "contact", "interest", "preferred_callback_time"],
     },
 }
 
@@ -61,6 +66,7 @@ def get_llm_reply(
                 name=lead.get("name", ""),
                 contact=lead.get("contact", ""),
                 interest=lead.get("interest", ""),
+                preferred_callback_time=lead.get("preferred_callback_time", ""),
                 notes=lead.get("notes", ""),
             )
 
