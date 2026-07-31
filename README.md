@@ -1,3 +1,6 @@
+> Note: "Gulf Gateway Business Hub (GGBH)" is a fictional stand-in for a representative
+> UAE business-setup client, not a real customer.
+
 # GGBH Speed2Lead Bot
 
 A Telegram bot for **Gulf Gateway Business Hub (GGBH)** that acts as a lightweight alternative to a
