@@ -1,3 +1,5 @@
+Test Link: t.me/UAE_passtest_bot
+
 > Note: "Gulf Gateway Business Hub (GGBH)" is a fictional stand-in for a representative
 > UAE business-setup client, not a real customer.
 
